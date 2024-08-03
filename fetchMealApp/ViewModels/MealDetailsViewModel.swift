@@ -7,17 +7,26 @@
 
 import Foundation
 
+@MainActor
 class MealDetailsViewModel: ObservableObject {
-    var recipeDetails = 
-    private var api = API()
+    @Published var mealDetails = MealDetails()
+    @Published var loadingState: LoadingState = .loading
     
-    init(selectedMeal: Meal) {
+    let selectedMeal: Meal
+    private let api: API
+    
+    init(selectedMeal: Meal, api: API) {
         self.selectedMeal = selectedMeal
+        self.api = api
     }
     
-    func fetchSelectedMealDetails(_ meal: Meal) async throws {
-        
+    func fetchSelectedMealDetails() async throws {
+        loadingState = .loading
+        mealDetails = try await api.fetchMeal(id: selectedMeal.mealIdentifier)
+        loadingState = .loaded
     }
     
-    
+    func setErrorState() {
+        loadingState = .error
+    }
 }

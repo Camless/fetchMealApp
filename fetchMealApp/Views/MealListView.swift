@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  MealListView.swift
 //  fetchMealApp
 //
 //  Created by Carlos Morales III on 7/30/24.
@@ -9,25 +9,52 @@ import SwiftUI
 
 struct MealListView: View {
     
-    @StateObject private var viewModel = RecipeListViewModel()
-    @State private var presentingSheet: Bool = false
+    @StateObject var viewModel: MealListViewModel
+    @EnvironmentObject var api: API
+    @State private var path = [Meal]()
     
     var body: some View {
-        NavigationStack {
-            List {
-                ForEach(viewModel.currentRecipes) { recipe in
-                    NavigationLink(destination: RecipeDetailsView(viewModel: RecipeDetailsViewModel(recipeDetail: RecipeDetail),
-                                                                  presentingSheet: $presentingSheet),
-                                   label: { 
-                        Text(recipe.name)
-                    })
+        switch viewModel.loadingState {
+        case .loaded:
+            NavigationStack(path: $path) {
+                List {
+                    ForEach(viewModel.currentMeals, id: \.self) { meal in
+                        NavigationLink(value: meal) {
+                            Text(meal.name)
+                        }
+                    }
                 }
+                .navigationDestination(for: Meal.self, destination: { meal in
+                    let recipeDetailsViewModel = MealDetailsViewModel(selectedMeal: meal, api: api)
+                    MealDetailsView(viewModel: recipeDetailsViewModel, path: $path)
+                })
+                .navigationTitle("Recipes")
             }
-            .navigationTitle("Recipes")
+        case .loading:
+            ProgressView()
+                .task {
+                    do {
+                        try await viewModel.fetchMeals()
+                    } catch {
+                        if !Task.isCancelled {
+                            viewModel.setErrorState()
+                        }
+                    }
+                }
+        case .error:
+            Color(.clear)
+                .alert("Error Loading!", isPresented: .constant(true), actions: {
+                    Button("Retry") {
+                        Task {
+                            try await viewModel.fetchMeals()
+                        }
+                    }
+                })
+            
         }
     }
 }
 
 #Preview {
-    MealListView()
+    MealListView(viewModel: MealListViewModel(api: API()))
 }

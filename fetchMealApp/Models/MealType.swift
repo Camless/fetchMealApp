@@ -6,3 +6,7 @@
 //
 
 import Foundation
+
+enum MealType: String {
+    case dessert = "Dessert"
+}

@@ -9,9 +9,13 @@ import SwiftUI
 
 @main
 struct fetchMealAppApp: App {
+    
+    let api = API()
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            let mealListViewModel = MealListViewModel(api: api)
+            MealListView(viewModel: mealListViewModel)
         }
+        .environmentObject(api)
     }
 }

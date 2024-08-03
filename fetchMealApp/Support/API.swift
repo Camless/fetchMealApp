@@ -7,9 +7,9 @@
 
 import Foundation
 
-class API {
-    var error = true
-    var error2 = true
+class API: ObservableObject {
+//    var error = true
+//    var error2 = true
     
     enum APIError: Error {
         case serverError
@@ -35,13 +35,13 @@ class API {
         }
     }
     
-    #warning("Look into whether this is needed or not")
     @MainActor
     func fetchMeals(ofType type: MealType) async throws -> [Meal] {
-        if error {
-            error = false
-            throw APIError.badURL
-        }
+//        if error {
+//            error = false
+//            throw APIError.badURL
+//        }
+        
         guard let url = EndPoint.mealType(type).url else {
             throw APIError.badURL
         }
@@ -62,10 +62,11 @@ class API {
     
     @MainActor
     func fetchMeal(id: String) async throws -> MealDetails {
-        if error2 {
-            error2 = false
-            throw APIError.badURL
-        }
+//        if error2 {
+//            error2 = false
+//            throw APIError.badURL
+//        }
+        
         guard let url = EndPoint.mealId(id).url else {
             throw APIError.badURL
         }
